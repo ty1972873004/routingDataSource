@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-4.0.xsd 
+            http://www.springframework.org/schema/data/mongo
+			http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util.xsd
+            ">
+            
+            
+    <!-- 加载mongodb的属性配置文件 -->
+	<context:property-placeholder location="classpath:mongo.properties" ignore-unresolvable="true" />
+	
+	
+	<!--这里使用mongo:mongo-client-->
+	  <mongo:mongo-client id="mongo"  replica-set="${mongo.hostport}">
+        <mongo:client-options
+                connections-per-host="${mongo.connectionsPerHost}"
+                min-connections-per-host="${mongo.minConnectionsPerHost}"
+                threads-allowed-to-block-for-connection-multiplier="${mongo.threadsAllowedToBlockForConnectionMultiplier}"
+                connect-timeout="${mongo.connectTimeout}"
+                max-wait-time="${mongo.maxWaitTime}"
+                socket-keep-alive="${mongo.socketKeepAlive}"
+                socket-timeout="${mongo.socketTimeout}"
+                description="${mongo.description}"
+                max-connection-idle-time="${mongo.maxConnectionIdleTime}"
+                max-connection-life-time="${mongo.maxConnectionLifeTime}"
+                heartbeat-socket-timeout="${mongo.heartbeatSocketTimeout}"
+                heartbeat-connect-timeout="${mongo.heartbeatConnectTimeout}"
+                min-heartbeat-frequency="${mongo.minHeartbeatFrequency}"
+                heartbeat-frequency="${mongo.heartbeatFrequency}"/>
+    </mongo:mongo-client>
+    
+    
+	<!-- <mongo:mongo-client id="mongo" replica-set="${mongo.hostport}">
+		<mongo:client-options 
+				min-connections-per-host="2"
+				connections-per-host="100"
+				connect-timeout="5000"
+				max-wait-time="120000"
+				heartbeat-frequency="2000"
+				heartbeat-connect-timeout="10000"
+				max-connection-life-time="3000"
+				socket-keep-alive="true"
+				socket-timeout="3000"
+				threads-allowed-to-block-for-connection-multiplier="5"
+				write-concern="SAFE"/>
+	</mongo:mongo-client> -->
+    
+	
+	<mongo:db-factory id="mongoDbFactory" dbname="${mongo.defaultDbName}" mongo-ref="mongo"/>
+	
+	<bean id="mappingContext" class="org.springframework.data.mongodb.core.mapping.MongoMappingContext"/>
+	
+	<bean id="mappingConverter" class="org.springframework.data.mongodb.core.convert.MappingMongoConverter">
+	  	<constructor-arg ref="mongoDbFactory" />
+	    	<constructor-arg ref="mappingContext" />
+	</bean>
+	
+	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
+		<constructor-arg name="mongoConverter" ref="mappingConverter" />
+		<property name="writeConcern">
+			<util:constant static-field="com.mongodb.WriteConcern.SAFE" />
+		</property>
+		<property name="writeResultChecking" value="EXCEPTION" />
+	</bean>
+	
+	<mongo:repositories base-package="cn.javaxxw" mongo-template-ref="mongoTemplate"/>
+
+</beans>

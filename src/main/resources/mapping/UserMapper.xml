@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.javaxxw.dao.UserMapper" >
+
+  <resultMap id="BaseResultMap" type="cn.javaxxw.model.User" >
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="VARCHAR" />
+    <result column="old" property="old" jdbcType="INTEGER" />
+  </resultMap>
+
+  
+  <insert id="addUser" parameterType="cn.javaxxw.model.User">
+    <selectKey keyProperty="id" resultType="int">
+            select LAST_INSERT_ID()
+     </selectKey>
+	 insert into 
+	 t_user(user_name,nick_name,sex,old) 
+	 values(#{userName},#{nickName},#{sex},#{old})
+  </insert>
+  
+  
+
+  
+  <insert id="insert" parameterType="cn.javaxxw.model.User">
+      insert into 
+	  t_user(user_name,nick_name,sex,old) 
+	  values(#{userName},#{nickName},#{sex},#{old})
+  </insert>
+  
+  
+  <update id="update" parameterType="cn.javaxxw.model.User">
+      update t_user   
+      <set>  
+	      <if test="userName != null">
+	          user_name=#{userName},
+	      </if>  
+	      <if test="nickName != null">
+	          nick_name=#{nickName},
+	      </if>  
+      </set>  
+      <where>  
+         <if test="id != null">  
+            id = #{id,jdbcType=INTEGER}  
+         </if>  
+      </where>  
+  </update>
+  
+  <!-- 更新对象（参数） -->  
+  <update id="updateByParam" parameterType="java.util.Map">  
+	     update t_user   
+	     <set>  
+		     <if test="userName != null">
+		         user_name=#{userName},
+		     </if>  
+		     <if test="nickName != null">
+		         nick_name=#{nickName},
+		     </if>  
+	     </set>  
+	     <where>  
+	       <if test="id != null">  
+	           id = #{id,jdbcType=INTEGER}  
+	       </if>  
+	     </where>  
+   </update>  
+   
+   <!-- 根据主键删除 -->  
+   <delete id="deleteByPk" parameterType="int">  
+        delete from t_user where id = #{id}  
+   </delete>  
+   
+   <!-- 根据参数删除 -->  
+   <delete id="deleteParam" parameterType="java.util.Map">  
+        delete from t_user  
+        <where>  
+            <if test="userName != null">
+               user_name = #{userName}
+            </if>  
+            <if test="nickName != null"> 
+               and nick_name = #{nickName}
+            </if>  
+            <if test="id != null"> 
+               and id = #{id}
+            </if>  
+        </where>  
+   </delete>  
+   
+   <!-- 批量删除 -->  
+   <delete id="deleteBatch">  
+        delete from t_user where id in   
+        <trim prefix="(" suffix=")" suffixOverrides=",">  
+            <foreach collection="list" item="id" separator=",">  
+                #{id}  
+            </foreach>  
+        </trim>  
+   </delete>  
+   
+   <!-- count -->  
+   <select id="count" resultType="int">  
+        select count(*) from t_user
+   </select>  
+   
+   <!-- 根据条件查询count -->
+   <select id="countByParam" parameterType="java.util.Map" resultType="int">  
+        select count(*) from t_user 
+        <where>  
+	        <if test="userName != null">
+	            user_name = #{userName}
+	        </if>  
+	        <if test="nickName != null"> 
+	            and nick_name = #{nickName}
+	        </if>  
+	        <if test="id != null"> 
+	           and id = #{id}
+	        </if>  
+       </where>  
+   </select>  
+   
+   <select id="selectPk" parameterType="int">
+      select * from t_user where id = #{id}
+   </select>
+   
+   <select id="selectAll" resultMap="BaseResultMap">
+	 select * from t_user
+   </select>
+   
+    <!-- 查询（参数） -->  
+   <select id="selectByParam" parameterType="java.util.Map" resultMap="BaseResultMap">  
+        select * from t_user   
+        <where>  
+	        <if test="userName != null">
+	          user_name = #{userName}
+	        </if>  
+	        <if test="nickName != null"> 
+	          and nick_name = #{nickName}
+	        </if>  
+	        <if test="id != null"> 
+	          and id = #{id}
+	        </if>  
+       </where>  
+       <if test="orderColumn != null">  
+            order by ${orderColumn}  
+            <if test="orderType != null">  
+                ${orderType}  
+            </if>  
+       </if>  
+   </select>  
+   
+   
+   
+  
+  
+ 
+</mapper>
